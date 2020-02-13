@@ -17,6 +17,8 @@ function createWindow() {
 
     win.setOpacity( .9 ) ;
 
+    win.webContents.openDevTools() ;
+
     win.removeMenu() ;
 
     // call global shortcuts

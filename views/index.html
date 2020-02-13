@@ -13,7 +13,13 @@
         <main>
 
             <header>
-                <h1>Terminal Ipsum</h1>
+                <h1>
+                    <sup>&copy;</sup>&nbsp;
+                    Terminal Ipsum
+                </h1>
+                <h2>
+                    [<span class="version"></span>]
+                </h2>
             </header>
 
             <ul class="terminal-list">
@@ -21,10 +27,8 @@
                 <li class="terminal-item">
                     <section>
                         <label for="command">
-
                             <span class="cwd">
                             </span>
-
                         </label>
                         <input
                             type="text"
@@ -41,7 +45,11 @@
 
         </main>
 
-        <script src="./index.js"></script>
+        <script src="./js/commands-history.js"></script>
+
+        <script src="./js/terminal.js"></script>
+
+        <script src="./js/index.js"></script>
 
     </body>
 </html>
