@@ -8,6 +8,7 @@ const Terminal = {
     Command: Command,
 
     input: document.querySelector('#command') ,
+    list: document.querySelector('.terminal-list') ,
 
     isListenInput: false ,
 
@@ -65,9 +66,23 @@ const Terminal = {
 
                 const cmdString = this.input.value ;
 
-                console.log('have enter :' + cmdString ) ;
+                this.input.value = "" ;
+
+                const command = new this.Command( {
+                    terminal: this ,
+                    commandString: cmdString ,
+                    onOutput: function( outputText ) {
+
+                        console.log( outputText ) ;
+                    }
+                } ) ;
+
+                console.log( command.isClearHistory );
             }
+
         } ) ;
+
+        return this ;
 
     } ,
 
@@ -88,6 +103,10 @@ const Terminal = {
             .upgradeVersion()
             .listenInput()
         ;
+
+        document.addEventListener('click' , () => (
+            this.input.focus()
+        ) ) ;
 
     }
 
