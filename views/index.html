@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
     <head>
@@ -14,22 +15,28 @@
 
             <header>
                 <h1>
-                    <sup>&copy;</sup>&nbsp;
                     Terminal Ipsum
                 </h1>
+
                 <h2>
-                    [<span class="version"></span>]
+                    [version <span class="version"></span>]
                 </h2>
+
+                <h3>
+                    2020 des gens biens<sup>&copy;</sup>&nbsp;
+                </h3>
             </header>
 
             <ul class="terminal-list">
 
-                <li class="terminal-item">
+                <li class="terminal-item terminal-item-input">
+
                     <section>
+
                         <label for="command">
-                            <span class="cwd">
-                            </span>
+                            <span class="cwd"></span>
                         </label>
+
                         <input
                             type="text"
                             name="command"
@@ -38,15 +45,27 @@
                             autofocus="on"
                             spellcheck="false"
                         >
+
                     </section>
+
                 </li>
 
             </ul>
 
         </main>
 
+        <!-- handler history commands -->
         <script src="./js/commands-history.js"></script>
 
+        <!-- command list [metadata] -->
+        <script src="./js/commands-list.js"></script>
+
+        <script src="./js/next-line-terminal.js"></script>
+
+        <!-- run command -->
+        <script src="./js/command.js"></script>
+
+        <!-- terminal script -->
         <script src="./js/terminal.js"></script>
 
         <script src="./js/index.js"></script>
