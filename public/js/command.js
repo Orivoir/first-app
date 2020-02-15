@@ -47,6 +47,147 @@ const SocketCommand = {
 
 } ;
 
+const Vars = {
+
+    state: [
+        {
+            key: "$HOST" ,
+            val: "127.0.0.1" ,
+            writable: false ,
+        } , {
+
+            key: "$AUTHOR" ,
+            val: "Orivoir21" ,
+            writable: false ,
+        }
+    ] ,
+
+    get notWritable() {
+
+        return this.state.filter( _var => _var.writable === false ) ;
+
+    } ,
+
+    setState() {
+
+        // for output
+        this.upgradesVar = [] ;
+
+        // upgrade var already exists
+        this.state = this.state.map( _var => {
+
+            const newVar = this.isRedefine( _var.key ) ;
+
+            if( !!newVar ) {
+                _var.val = newVar.val ;
+                _var.writable = newVar.writable ;
+                this.upgradesVar.push( newVar ) ;
+            }
+
+            return _var ;
+
+        } ) ;
+
+        // for output
+        this.createsVar = [] ;
+
+        // add new vars
+        this.varsNormalized.forEach( vNormalized => {
+
+            if( !this.alreadyExists(vNormalized.key) ) {
+
+                this.createsVar.push( vNormalized ) ;
+                this.state.push( vNormalized ) ;
+            }
+
+        } ) ;
+    } ,
+
+    alreadyExists( key ) {
+
+        return !!this.state.find( _var => _var.key === key ) ;
+
+    } ,
+
+    isRedefine( key ) {
+
+        return this.varsNormalized.find( _v => _v.key === key ) ;
+
+    } ,
+
+    isProtect( key ) {
+
+        const {notWritable} = this ;
+
+        return !!notWritable.find( _var => _var.key === key ) ;
+
+    } ,
+
+    checkNotAuthorizeAffect() {
+
+        this.rejectsAffect = [] ;
+
+        this.varsNormalized = this.varsNormalized.filter( varNormalized => {
+
+            if( this.isProtect( varNormalized.key )  ) {
+
+                this.rejectsAffect.push( varNormalized ) ;
+                return false ;
+            }
+
+            return true ;
+        } ) ;
+
+    } ,
+
+    normalize( varParsed ) {
+
+        varParsed = varParsed
+        .map( vParse => {
+
+            const save = {
+                key: vParse[0]
+            } ;
+
+            let [val,writable] = vParse[1].split('|') ;
+
+            writable = !/(read(only)?|r(d)?o(n)?(l)?(y)?)/i.test(writable) ;
+
+            save.val = val ;
+            save.writable = writable ;
+
+            return save ;
+        } ) ;
+
+        this.varsNormalized = varParsed ;
+
+        this.checkNotAuthorizeAffect() ;
+        this.setState() ;
+    } ,
+
+    parse( varstr  ) {
+
+        varstr = varstr
+            .trim()
+            .split(';')
+            .map( _var => (
+                _var
+                    .trim()
+                    .split('=')
+                    .map( key => (
+                        key.trim()
+                    ) )
+            ) )
+            .filter( _var => _var.length === 2 ) // exlude last ";" char
+        ;
+
+        this.normalize( varstr ) ;
+
+        return this ;
+    }
+
+} ;
+
 class Command {
 
     static get PATTERN_ARG_FUNC() {
@@ -57,6 +198,16 @@ class Command {
     static get PATTERN_ARG_GLOBAL() {
 
         return /^(\-)(\-)/ ;
+    }
+
+    static get PATTERN_VAR() {
+
+        return /^\$[a-z\_]{1}[a-z\_\d]{0,254}[ ]{0,}\=[ ]{0,}.{1,}/i ;
+    }
+
+    get isVar() {
+
+        return Command.PATTERN_VAR.test( this.commandString ) ;
     }
 
     constructor({
@@ -84,10 +235,9 @@ class Command {
             // ...
             console.log( "valid command name" );
 
-            // because can try: "undefined()" ;
-            try {
+            const cmd = this.getCmdByName( this.commandName ) ;
 
-                const cmd = this.getCmdByName( this.commandName ) ;
+            if( this[ cmd.normalize ] instanceof Function  ) {
 
                 if( cmd.argsRequireLength > this.argsCmd ) {
 
@@ -98,10 +248,16 @@ class Command {
                     this[ cmd.normalize ]() ;
                 }
 
-            } catch( TypeError ) {
+            } else {
 
                 this.output = `"${this.commandName}" , is valid command name but action in dev` ;
             }
+
+        }  else if( this.isVar ) {
+
+            Vars.parse( this.commandString , this ) ;
+
+            this.output = `${Vars.rejectsAffect.length} vars not write access, ${Vars.createsVar.length} vars has been created, ${Vars.upgradesVar.length} vars has been set` ;
 
         } else if( !this.isOnlyArgs ) {
 
@@ -121,6 +277,15 @@ class Command {
             document.querySelector(`#${this.idOutput}`).textContent = this.output ;
         }
 
+    }
+
+    echo() {
+
+        const print = this.argsCmd.join(' ') ;
+
+        const outputElement = document.querySelector(`#${this.idOutput}`) ;
+
+        outputElement.textContent = `"${print}"` ;
     }
 
     cd() {
