@@ -143,10 +143,3 @@
 ```
 
 ### The `normalize` attribute is the function name to exec action
-
-
-### functions list
-
-- **clear()** ask empty view
-
-###

@@ -73,7 +73,7 @@ const commandsList = [
 
     // removeFile
     {
-        pattern: /^(remove|rm|del(ete)?)(\-)(file|item)|unset$/ ,
+        pattern: /^(remove|rm|del(ete)?)(\-)(file|item)$/ ,
         argsLength: 1 ,
         argsRequireLength: 1 ,
         readOnly: false ,

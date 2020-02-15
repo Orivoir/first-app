@@ -1,233 +1,9 @@
-const SocketCommand = {
-
-    idOutput: null ,
-
-    init( socket , command ) {
-
-        this.cmd = command ;
-        this.worker = socket ;
-
-        this.attachListeners() ;
-    } ,
-
-    attachListeners() {
-
-        this
-            .cd()
-        ;
-
-    } ,
-
-    cd() {
-
-        const socket = this.worker ;
-
-        socket.on('cd error' , path => {
-
-            const outputElement = document.querySelector(`#${this.idOutput}`) ;
-
-            outputElement.textContent = `"${path}" , not exists` ;
-
-            this.cmd.isPendingAction = false ;
-
-        } ) ;
-
-        socket.on('cd success' , path => {
-
-            this.cmd.isPendingAction = false ;
-
-            const outputElement = document.querySelector(`#${this.idOutput}`) ;
-
-            Terminal.cwd = path ;
-            outputElement.textContent = `"${path}" , is the new current work directory` ;
-        } ) ;
-
-        return this ;
-    }
-
-} ;
-
-const Vars = {
-
-    state: [
-        {
-            key: "$HOST" ,
-            val: "127.0.0.1" ,
-            writable: false ,
-        } , {
-
-            key: "$AUTHOR" ,
-            val: "Orivoir21" ,
-            writable: false ,
-        }
-    ] ,
-
-    get notWritable() {
-
-        return this.state.filter( _var => _var.writable === false ) ;
-
-    } ,
-
-    transform( arrStr ) {
-
-        return arrStr.map( print => {
-
-            const usual = print.trim() ;
-
-            if( usual.charAt( 0 ) === "$" ) {
-
-                const _var = this.getVarByKey( usual ) ;
-
-                if( !!_var ) {
-
-                    return _var.val ;
-
-                } else {
-                    // ReferenceError
-                    return `<ReferenceError: ${usual}>`
-                }
-
-
-            } else {
-                // static string
-                return print ;
-            }
-
-        } ) ;
-
-    } ,
-
-    setState() {
-
-        // for output
-        this.upgradesVar = [] ;
-
-        // upgrade var already exists
-        this.state = this.state.map( _var => {
-
-            const newVar = this.isRedefine( _var.key ) ;
-
-            if( !!newVar ) {
-                _var.val = newVar.val ;
-                _var.writable = newVar.writable ;
-                this.upgradesVar.push( newVar ) ;
-            }
-
-            return _var ;
-
-        } ) ;
-
-        // for output
-        this.createsVar = [] ;
-
-        // add new vars
-        this.varsNormalized.forEach( vNormalized => {
-
-            if( !this.alreadyExists(vNormalized.key) ) {
-
-                this.createsVar.push( vNormalized ) ;
-                this.state.push( vNormalized ) ;
-            }
-
-        } ) ;
-    } ,
-
-    alreadyExists( key ) {
-
-        return !!this.state.find( _var => _var.key === key ) ;
-
-    } ,
-
-    isRedefine( key ) {
-
-        return this.varsNormalized.find( _v => _v.key === key ) ;
-
-    } ,
-
-    isProtect( key ) {
-
-        const {notWritable} = this ;
-
-        return !!notWritable.find( _var => _var.key === key ) ;
-
-    } ,
-
-    checkNotAuthorizeAffect() {
-
-        this.rejectsAffect = [] ;
-
-        this.varsNormalized = this.varsNormalized.filter( varNormalized => {
-
-            if( this.isProtect( varNormalized.key )  ) {
-
-                this.rejectsAffect.push( varNormalized ) ;
-                return false ;
-            }
-
-            return true ;
-        } ) ;
-
-    } ,
-
-    getVarByKey( key ) {
-
-        return this.state.find( _var => _var.key === key ) || null ;
-
-    } ,
-
-    normalize( varParsed ) {
-
-        varParsed = varParsed
-        .map( vParse => {
-
-            const save = {
-                key: vParse[0]
-            } ;
-
-            let [val,writable] = vParse[1].split('|') ;
-
-            writable = !/(read(only)?|r(d)?o(n)?(l)?(y)?)/i.test(writable) ;
-
-            save.val = val ;
-            save.writable = writable ;
-
-            return save ;
-        } ) ;
-
-        this.varsNormalized = varParsed ;
-
-        this.checkNotAuthorizeAffect() ;
-        this.setState() ;
-    } ,
-
-    parse( varstr  ) {
-
-        varstr = varstr
-            .trim()
-            .split(';')
-            .map( _var => (
-                _var
-                    .trim()
-                    .split('=')
-                    .map( key => (
-                        key.trim()
-                    ) )
-            ) )
-            .filter( _var => _var.length === 2 ) // exlude last ";" char
-        ;
-
-        this.normalize( varstr ) ;
-
-        return this ;
-    }
-
-} ;
 
 class Command {
 
     static get PATTERN_ARG_FUNC() {
 
-        return /^[a-z]{1,50}\([ ]{0,}\)$/i ;
+        return /^[a-z]{1,50}\(.{0,}\)$/i ;
     }
 
     static get PATTERN_ARG_GLOBAL() {
@@ -240,11 +16,6 @@ class Command {
         return /^\$[a-z\_]{1}[a-z\_\d]{0,254}[ ]{0,}\=[ ]{0,}.{1,}/i ;
     }
 
-    get isVar() {
-
-        return Command.PATTERN_VAR.test( this.commandString ) ;
-    }
-
     constructor({
         terminal ,
         commandString
@@ -253,7 +24,7 @@ class Command {
         if( !SocketCommand.worker ) {
 
             // listeners TCP/IP commands inner an litteral object
-            // for not dupplicate listeners between instance of Command object
+            // for not dupplicate listeners between two instances of self
             SocketCommand.init( terminal.socket , this ) ;
         }
 
@@ -360,31 +131,6 @@ class Command {
         return this ;
     }
 
-    get isLogout() {
-
-        return !![ ...this.argsGlobal , ...this.argsFunc ].find( arg => (
-            /(logout|exit|quit)/.test( arg )
-        ) )  || /(logout|exit|quit)/.test(this.commandName)  ;
-    }
-
-    get isClearView() {
-
-        return !!this.argsFunc.find( arg => (
-            /clear\([ ]{0,}\)/.test( arg.trim() )
-        ) ) ;
-
-    }
-
-    get isClearHistory() {
-
-        return (
-            !!this.argsGlobal.find( arg => (
-                /clear$/.test( arg )
-            ) )
-        ) ;
-
-    }
-
     get isPendingAction() {
         return this._isPendingAction;
     }
@@ -450,8 +196,19 @@ class Command {
         return this ;
     }
 
+    /**
+     * @method sortArg
+     * @param {string[]} args
+     * @return {self} self
+     *
+     * @description sort args by `type` \
+     * args function *e.g : clear() , unset( $i ) , exit()*
+     * args global *e.g : --clear , --email , --user , --git*
+     * args command *e.g : mkdir stuff , cd stuff*
+     */
     sortArg( args ) {
 
+        // if not global arg and not func arg is an command arg :-)
         this.argsCmd = args.filter( arg => (
             !Command.PATTERN_ARG_GLOBAL.test( arg ) &&
             !Command.PATTERN_ARG_FUNC.test( arg )
@@ -473,6 +230,50 @@ class Command {
         }
 
         return this ;
+    }
+
+    // Getters check an command type
+
+    /**
+     * @description check if **command string** is an list of `vars` define
+     */
+    get isVar() {
+
+        return Command.PATTERN_VAR.test( this.commandString ) ;
+    }
+
+    /**
+     * @description check if ask close terminal
+     */
+    get isLogout() {
+
+        return !![ ...this.argsGlobal , ...this.argsFunc ].find( arg => (
+            /(logout|exit|quit)/.test( arg )
+        ) )  || /(logout|exit|quit)/.test(this.commandName)  ;
+    }
+
+    /**
+     * @description check if ask an empty screen
+     */
+    get isClearView() {
+
+        return !!this.argsFunc.find( arg => (
+            /clear\([ ]{0,}\)/.test( arg.trim() )
+        ) ) ;
+
+    }
+
+    /**
+     * @description check if ask an empty history **commands string**
+     */
+    get isClearHistory() {
+
+        return (
+            !!this.argsGlobal.find( arg => (
+                /clear$/.test( arg )
+            ) )
+        ) ;
+
     }
 
 } ;

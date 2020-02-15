@@ -12,14 +12,15 @@ const History = {
             cmdName !== c
         ) ) ;
 
-        this.index = 0 ;
+        // baecause not re-index
+        this.index = 1 ;
 
     } ,
 
     clear() {
 
         this.cmds = [] ;
-        this.index = 0 ;
+        this.index = 1 ;
 
     } ,
 
@@ -42,7 +43,7 @@ const History = {
         return this.cmds[ this.index ] ;
     } ,
 
-    _index: 0 ,
+    _index: 1 ,
 
     cmds: [] ,
 
