@@ -1,5 +1,15 @@
-const commandsList = [
+# Terminal UI
 
+## Terminal UI with electron app test
+
+- ```git clone https://github.com/Orivoir/first-app.git```
+- ```cd first-app```
+- ```npm install```
+- ```npm start```
+
+### commands list ( metadatas )
+```js
+    [
     /*
         {
             pattern: regexp ,
@@ -48,7 +58,7 @@ const commandsList = [
         argsRequireLength: 1 ,
         normalize: 'echo' ,
         readOnly: true,
-        describe: 'log string value'
+        describe: 'log an string value'
     } ,
 
     // newFile
@@ -129,5 +139,7 @@ const commandsList = [
         readOnly: true ,
         describe: 'helper list commands'
     } ,
+    ]
+```
 
-] ;
+### The `normalize` attribute is the function name to exec action
