@@ -5,7 +5,6 @@
 - ```git clone https://github.com/Orivoir/first-app.git```
 - ```cd first-app```
 - ```npm install```
-- ```npm run start-http```
 - ```npm start```
 
 ### commands list ( metadatas )

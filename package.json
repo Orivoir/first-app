@@ -4,8 +4,7 @@
   "main": "main.js",
   "license": "MIT",
   "scripts": {
-    "start": "electron ." ,
-    "start-http": "pm2 start ./ecosystem.config.js"
+    "start": "electron ."
   },
   "devDependencies": {
     "electron": "^8.0.0"

@@ -1,3 +1,52 @@
+const SocketCommand = {
+
+    idOutput: null ,
+
+    init( socket , command ) {
+
+        this.cmd = command ;
+        this.worker = socket ;
+
+        this.attachListeners() ;
+    } ,
+
+    attachListeners() {
+
+        this
+            .cd()
+        ;
+
+    } ,
+
+    cd() {
+
+        const socket = this.worker ;
+
+        socket.on('cd error' , path => {
+
+            const outputElement = document.querySelector(`#${this.idOutput}`) ;
+
+            outputElement.textContent = `"${path}" , not exists` ;
+
+            this.cmd.isPendingAction = false ;
+
+        } ) ;
+
+        socket.on('cd success' , path => {
+
+            this.cmd.isPendingAction = false ;
+
+            const outputElement = document.querySelector(`#${this.idOutput}`) ;
+
+            Terminal.cwd = path ;
+            outputElement.textContent = `"${path}" , is the new current work directory` ;
+        } ) ;
+
+        return this ;
+    }
+
+} ;
+
 class Command {
 
     static get PATTERN_ARG_FUNC() {
@@ -15,9 +64,18 @@ class Command {
         commandString
     }) {
 
+        if( !SocketCommand.worker ) {
+
+            // listeners TCP/IP commands inner an litteral object
+            // for not dupplicate listeners between instance of Command object
+            SocketCommand.init( terminal.socket , this ) ;
+        }
+
         this.terminal = terminal ;
 
         this.commandString = commandString ;
+
+        this.nextLine() ;
 
         this.explodeCommand() ;
 
@@ -25,6 +83,25 @@ class Command {
 
             // ...
             console.log( "valid command name" );
+
+            // because can try: "undefined()" ;
+            try {
+
+                const cmd = this.getCmdByName( this.commandName ) ;
+
+                if( cmd.argsRequireLength > this.argsCmd ) {
+
+                    this.output = `"${this.commandName}" , have ${cmd.argsRequireLength} args require` ;
+
+                } else {
+
+                    this[ cmd.normalize ]() ;
+                }
+
+            } catch( TypeError ) {
+
+                this.output = `"${this.commandName}" , is valid command name but action in dev` ;
+            }
 
         } else if( !this.isOnlyArgs ) {
 
@@ -40,7 +117,27 @@ class Command {
             console.log( "only args" );
         }
 
-        this.nextLine() ;
+        if( this.output ) {
+            document.querySelector(`#${this.idOutput}`).textContent = this.output ;
+        }
+
+    }
+
+    cd() {
+
+        const path = this.argsCmd[0] ;
+
+        this.isPendingAction = true ;
+
+        const {socket} = this.terminal ;
+
+        SocketCommand.idOutput = this.idOutput ;
+
+        socket.emit('cd' , {
+            pathCd:path ,
+            cwd: this.terminal.cwd
+        } ) ;
+
     }
 
     getCmdByName( cmdName ) {
@@ -52,18 +149,13 @@ class Command {
 
     nextLine() {
 
-        this.idOutputElement = new NextLineTerminal( {
+        this.idOutput = new NextLineTerminal( {
 
             cwd: this.terminal.cwd ,
             commandString: this.commandString ,
             terminalList: this.terminal.list
 
         } ).idOutput ;
-
-        document
-            .querySelector( `#${this.idOutputElement}` )
-            .textContent = this.output
-        ;
 
         return this ;
     }
@@ -100,7 +192,7 @@ class Command {
 
         this._isPendingAction = !!isPendingAction ;
 
-        if( !this._isPendingAction ) {
+        if( this._isPendingAction ) {
 
             // stop layout
             console.log('action in load ...');

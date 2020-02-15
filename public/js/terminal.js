@@ -1,16 +1,21 @@
 const Terminal = {
 
     version: '0.1.0-alpha' ,
-    cwd: 'c:\\' ,
+    _cwd: 'c:\\' ,
+    socket: io('/') ,
 
-    get socket() {
+    get cwd() {
+        return this._cwd;
+    } ,
+    set cwd(cwd) {
+        this._cwd = typeof cwd === "string" ? cwd : "c:\\" ;
 
-        return io('/') ;
+        this.upgradeCwd() ;
     } ,
 
     history: History ,
 
-    Command: Command,
+    Command: Command ,
 
     input: document.querySelector('#command') ,
     list: document.querySelector('.terminal-list') ,
@@ -96,7 +101,7 @@ const Terminal = {
 
                 } else if( command.isLogout ) {
 
-                    this.socket.emit('logout')
+                    this.socket.emit('logout') ;
                 }
             }
 
