@@ -3,12 +3,18 @@ const Terminal = {
     version: '0.1.0-alpha' ,
     cwd: 'c:\\' ,
 
+    get socket() {
+
+        return io('/') ;
+    } ,
+
     history: History ,
 
     Command: Command,
 
     input: document.querySelector('#command') ,
     list: document.querySelector('.terminal-list') ,
+    header: document.querySelector('header') ,
 
     isListenInput: false ,
 
@@ -70,14 +76,28 @@ const Terminal = {
 
                 const command = new this.Command( {
                     terminal: this ,
-                    commandString: cmdString ,
-                    onOutput: function( outputText ) {
-
-                        console.log( outputText ) ;
-                    }
+                    commandString: cmdString
                 } ) ;
 
-                console.log( command.isClearHistory );
+                this.history.add( cmdString ) ;
+
+                // ask an empty view
+                if( command.isClearView ) {
+
+                    if( !this.header.classList.contains('hide') )
+                        this.header.classList.add('hide') ;
+
+                    // delete all output line
+                    NextLineTerminal.removeLines( this.list ) ;
+
+                } else if( command.isClearHistory ) {
+
+                    this.history.clear() ;
+
+                } else if( command.isLogout ) {
+
+                    this.socket.emit('logout')
+                }
             }
 
         } ) ;

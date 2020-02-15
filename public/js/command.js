@@ -2,7 +2,7 @@ class Command {
 
     static get PATTERN_ARG_FUNC() {
 
-        return /^[a-z]{1,50}\(\)$/i ;
+        return /^[a-z]{1,50}\([ ]{0,}\)$/i ;
     }
 
     static get PATTERN_ARG_GLOBAL() {
@@ -12,8 +12,7 @@ class Command {
 
     constructor({
         terminal ,
-        commandString ,
-        onOutput
+        commandString
     }) {
 
         this.terminal = terminal ;
@@ -25,14 +24,23 @@ class Command {
         if( this.isValidCommandName ) {
 
             // ...
+            console.log( "valid command name" );
 
-        } else {
+        } else if( !this.isOnlyArgs ) {
 
             this.output = `"${this.commandName}" , is not an valid command name` ;
+        } else {
+
+            if( this.isClearHistory ) {
+
+                this.output = `history commands has been removed` ;
+            }
+
+            // ...
+            console.log( "only args" );
         }
 
         this.nextLine() ;
-        onOutput( this.output ) ;
     }
 
     getCmdByName( cmdName ) {
@@ -52,7 +60,26 @@ class Command {
 
         } ).idOutput ;
 
+        document
+            .querySelector( `#${this.idOutputElement}` )
+            .textContent = this.output
+        ;
+
         return this ;
+    }
+
+    get isLogout() {
+
+        return !![ ...this.argsGlobal , ...this.argsFunc ].find( arg => (
+            /(logout|exit|quit)/.test( arg )
+        ) )  || /(logout|exit|quit)/.test(this.commandName)  ;
+    }
+
+    get isClearView() {
+
+        return !!this.argsFunc.find( arg => (
+            /clear\([ ]{0,}\)/.test( arg.trim() )
+        ) ) ;
 
     }
 
@@ -61,8 +88,6 @@ class Command {
         return (
             !!this.argsGlobal.find( arg => (
                 /clear$/.test( arg )
-            ) ) || !!this.argsFunc.find( arg => (
-                /clear\(\)$/.test( arg )
             ) )
         ) ;
 
@@ -147,6 +172,13 @@ class Command {
         this.argsFunc = args.filter( arg => (
             Command.PATTERN_ARG_FUNC.test( arg )
         ) ) ;
+
+        // check if the command name is an arg
+        if( Command.PATTERN_ARG_FUNC.test( this.commandName ) ) {
+            this.argsFunc.push( this.commandName ) ;
+        } else if ( Command.PATTERN_ARG_GLOBAL.test( this.commandName ) ) {
+            this.argsGlobal.push( this.commandName ) ;
+        }
 
         return this ;
     }

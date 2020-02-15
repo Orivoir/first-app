@@ -1,4 +1,24 @@
+let terminalLines = [] ;
+
 class NextLineTerminal {
+
+    static get lines() {
+
+        return terminalLines ;
+    }
+
+    static removeLines( list ) {
+
+        const linesRemove = terminalLines.length ;
+
+        terminalLines.forEach( line => {
+            list.removeChild( line ) ;
+        } ) ;
+
+        terminalLines = [] ;
+
+        return linesRemove ;
+    }
 
     constructor( {
 
@@ -22,6 +42,8 @@ class NextLineTerminal {
         wrap.innerHTML = this.innerHTML ;
 
         terminalList.insertBefore( wrap , NextLineTerminal.inputItem ) ;
+
+        terminalLines.push( wrap ) ;
 
     }
 

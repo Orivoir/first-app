@@ -13,7 +13,7 @@ function createWindow() {
         }
     } ) ;
 
-    win.loadFile('./views/index.html') ;
+    win.loadURL('http://localhost:3000/') ;
 
     win.setOpacity( .9 ) ;
 
