@@ -68,6 +68,35 @@ const Vars = {
 
     } ,
 
+    transform( arrStr ) {
+
+        return arrStr.map( print => {
+
+            const usual = print.trim() ;
+
+            if( usual.charAt( 0 ) === "$" ) {
+
+                const _var = this.getVarByKey( usual ) ;
+
+                if( !!_var ) {
+
+                    return _var.val ;
+
+                } else {
+                    // ReferenceError
+                    return `<ReferenceError: ${usual}>`
+                }
+
+
+            } else {
+                // static string
+                return print ;
+            }
+
+        } ) ;
+
+    } ,
+
     setState() {
 
         // for output
@@ -137,6 +166,12 @@ const Vars = {
 
             return true ;
         } ) ;
+
+    } ,
+
+    getVarByKey( key ) {
+
+        return this.state.find( _var => _var.key === key ) || null ;
 
     } ,
 
@@ -281,7 +316,7 @@ class Command {
 
     echo() {
 
-        const print = this.argsCmd.join(' ') ;
+        const print = Vars.transform( this.argsCmd ).join(' ') ;
 
         const outputElement = document.querySelector(`#${this.idOutput}`) ;
 
