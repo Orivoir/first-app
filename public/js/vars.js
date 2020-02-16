@@ -1,3 +1,5 @@
+// @TODO: add an free malloc function `(varName:string) => boolean`
+
 const Vars = {
 
     state: [
@@ -74,7 +76,7 @@ const Vars = {
         // add new vars
         this.varsNormalized.forEach( vNormalized => {
 
-            if( !this.alreadyExists(vNormalized.key) ) {
+            if( !this.alreadyExists( vNormalized.key ) ) {
 
                 this.createsVar.push( vNormalized ) ;
                 this.state.push( vNormalized ) ;

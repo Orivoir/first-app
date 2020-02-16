@@ -39,7 +39,7 @@ class Command {
         if( this.isValidCommandName ) {
 
             // ...
-            console.log( "valid command name" );
+            console.log( "valid command name" ) ;
 
             const cmd = this.getCmdByName( this.commandName ) ;
 
@@ -61,6 +61,8 @@ class Command {
 
         }  else if( this.isVar ) {
 
+            // is an define / set var.s
+
             Vars.parse( this.commandString , this ) ;
 
             this.output = `${Vars.rejectsAffect.length} vars not write access, ${Vars.createsVar.length} vars has been created, ${Vars.upgradesVar.length} vars has been set` ;
@@ -70,6 +72,7 @@ class Command {
             this.output = `"${this.commandName}" , is not an valid command name` ;
         } else {
 
+            // only args command
             if( this.isClearHistory ) {
 
                 this.output = `history commands has been removed` ;
@@ -78,6 +81,7 @@ class Command {
             // ...
             console.log( "only args" );
         }
+
 
         if( this.output ) {
             document.querySelector(`#${this.idOutput}`).textContent = this.output ;
@@ -96,26 +100,19 @@ class Command {
 
     cd() {
 
-        const path = this.asyncPrepare() ;
+        const pathCd = this.asyncPrepare() ;
 
-        const {socket} = this.terminal ;
-
-        socket.emit('cd' , {
-            pathCd:path ,
-            cwd: this.terminal.cwd
+        this.asyncExec( 'cd' , {
+            pathCd: pathCd
         } ) ;
-
     }
 
     mkdir() {
 
-        const dirname = this.asyncPrepare() ;
+        const pathMkdir = this.asyncPrepare() ;
 
-        const {socket} = this.terminal ;
-
-        socket.emit('mkdir' , {
-            pathMkdir: dirname ,
-            cwd: this.terminal.cwd
+        this.asyncExec( 'mkdir' , {
+            pathMkdir: pathMkdir
         } ) ;
 
     }
@@ -124,11 +121,8 @@ class Command {
 
         const pathLs = this.asyncPrepare() ;
 
-        const {socket} = this.terminal ;
-
-        socket.emit('ls' , {
-            pathLs: pathLs ,
-            cwd: this.terminal.cwd
+        this.asyncExec( 'ls', {
+            pathLs: pathLs
         } ) ;
     }
 
@@ -163,14 +157,21 @@ class Command {
 
     newFile() {
 
-        const filename = this.asyncPrepare() ;
+        const filePath = this.asyncPrepare() ;
 
-        const {socket} = this.terminal ;
+        this.asyncExec( 'new file' , {
+            filePath: filePath
+        } ) ;
 
-        socket.emit('new file' , ({
-            filePath: filename ,
-            cwd: this.terminal.cwd
-        } ) ) ;
+    }
+
+    removeFile() {
+
+        const filePath = this.asyncPrepare() ;
+
+        this.asyncExec( 'remove file' , {
+            filePath: filePath
+        } ) ;
     }
 
     fs() {
@@ -178,6 +179,16 @@ class Command {
         const {socket} = this.terminal ;
 
         socket.emit('fs') ;
+    }
+
+    asyncExec( eventName , tcpTransfer ) {
+
+        const {socket} = this.terminal ;
+
+        socket.emit( eventName , ( {
+            ...tcpTransfer ,
+            cwd: this.terminal.cwd
+        } ) ) ;
     }
 
     asyncPrepare() {

@@ -17,6 +17,7 @@ const SocketCommand = {
             .mkdir()
             .ls()
             .newFile()
+            .removeFile()
         ;
 
     } ,
@@ -139,6 +140,34 @@ const SocketCommand = {
             this.cmd.isPendingAction = false ;
 
             this.outputElement.textContent = `"${filename}" , have been create in "${filePath}"` ;
+
+        } ) ;
+
+        return this ;
+    } ,
+
+    removeFile() {
+
+        const socket = this.worker ;
+
+        socket.on('remove file error' , ({
+            filePath,
+            filename
+        } ) => {
+
+            this.cmd.isPendingAction = false ;
+
+            this.outputElement.textContent = `"${filename}" , cant remove in "${filePath}"` ;
+        } ) ;
+
+        socket.on('remove file success' , ({
+            filePath,
+            filename
+        }) => {
+
+            this.cmd.isPendingAction = false ;
+
+            this.outputElement.textContent = `"${filename}" , have been remove in "${filePath}"` ;
 
         } ) ;
 
