@@ -17,8 +17,9 @@ const commandsList = [
         argsLength: 1 ,
         argsRequireLength: 1 ,
         normalize: 'cd' ,
-        readOnly: false ,
-        describe: 'change the current work directory'
+        readOnly: true ,
+        describe: 'change the current work directory' ,
+        name: 'cd'
     } ,
 
     // mkdir
@@ -28,7 +29,8 @@ const commandsList = [
         argsRequireLength: 1 ,
         normalize: 'mkdir' ,
         readOnly: false ,
-        describe: 'create an new directory'
+        describe: 'create an new directory' ,
+        name: 'mkdir'
     } ,
 
     // fs
@@ -38,7 +40,8 @@ const commandsList = [
         argsRequireLength: 0,
         normalize: 'fs' ,
         readOnly: true,
-        describe: 'switch state fullscreen mode'
+        describe: 'switch state fullscreen mode' ,
+        name: 'fs'
     } ,
 
     // echo
@@ -48,7 +51,8 @@ const commandsList = [
         argsRequireLength: 1 ,
         normalize: 'echo' ,
         readOnly: true,
-        describe: 'log string value'
+        describe: 'log string value' ,
+        name: 'echo'
     } ,
 
     // newFile
@@ -58,7 +62,8 @@ const commandsList = [
         argsRequireLength: 1,
         readOnly: false,
         describe: 'append an new file' ,
-        normalize: 'newFile'
+        normalize: 'newFile' ,
+        name: 'new-file'
     } ,
 
     // logout
@@ -68,7 +73,8 @@ const commandsList = [
         argsRequireLength: 1 ,
         readOnly: true ,
         describe: 'close the current terminal' ,
-        normalize: 'logout'
+        normalize: 'logout' ,
+        name: 'logout' ,
     } ,
 
     // removeFile
@@ -78,7 +84,8 @@ const commandsList = [
         argsRequireLength: 1 ,
         readOnly: false ,
         describe: 'delete the target file' ,
-        normalize: 'removeFile'
+        normalize: 'removeFile' ,
+        name: 'remove-file'
     } ,
 
     // rnameItem
@@ -88,7 +95,8 @@ const commandsList = [
         argsRequireLength: 1 ,
         readOnly: false,
         describe: 're name the target item ( file or directory )' ,
-        normalize: 'rnameItem'
+        normalize: 'rnameItem' ,
+        name: 'rname-item'
     } ,
 
     // run
@@ -97,7 +105,8 @@ const commandsList = [
         argsLength: 1,
         argsRequireLength: 1 ,
         normalize: 'run' ,
-        describe: 'execute the target file with default programm associate'
+        describe: 'execute the target file with default programm associate' ,
+        name: 'run'
     } ,
 
     // ajax
@@ -107,7 +116,8 @@ const commandsList = [
         argsRequireLength: 1 ,
         readOnly: false,
         normalize: 'ajax' ,
-        describe: 'send an AJAX request on an target URI'
+        describe: 'send an AJAX request on an target URI' ,
+        name: 'ajax'
     } ,
 
     // ls
@@ -117,7 +127,8 @@ const commandsList = [
         argsRequireLength: 0 ,
         readOnly: true ,
         normalize: 'ls' ,
-        describe: 'show items list in the current work directory'
+        describe: 'show items list in the current work directory' ,
+        name: 'ls'
     } ,
 
     // help
@@ -127,7 +138,8 @@ const commandsList = [
         argsRequireLength: 0 ,
         normalize: 'help' ,
         readOnly: true ,
-        describe: 'helper list commands'
+        describe: 'helper list commands' ,
+        name: 'help'
     } ,
 
 ] ;

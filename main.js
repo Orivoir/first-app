@@ -14,10 +14,13 @@ function createWindow( io ) {
         }
     } ) ;
 
+    const shortcuts = require('./lib/shortcuts/endpoint') ;
 
-    require('./lib/shortcuts/endpoint')( win ) ;
+    shortcuts.listeners( win ) ;
 
-    require('./lib/tcp')( { io , win , app } ) ;
+    const shortcutsFx = shortcuts.actions ;
+
+    require('./lib/tcp')( { io , win , app , shortcutsFx } ) ;
 
     win.loadURL('http://localhost:3000/') ;
 
@@ -26,11 +29,9 @@ function createWindow( io ) {
     win.webContents.openDevTools() ;
 
     win.removeMenu() ;
-
-    // call global shortcuts
 }
 
-// server
+// server HTTP
 const
     exp = require('express') ,
     routerHTTP = exp() ,

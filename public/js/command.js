@@ -132,6 +132,35 @@ class Command {
         } ) ;
     }
 
+    help() {
+
+        const commandHelper = this.argsCmd[0] ;
+
+        const outputElement = document.querySelector(`#${this.idOutput}`) ;
+
+        const describe = (cmd,cmdName) => (
+            `"${cmdName || commandHelper}" , describe : ${cmd.describe} , arg.s : ${cmd.argsLength} , args require.s : ${cmd.argsRequireLength} , read only : ${cmd.readOnly ? "yes": "no"}`
+        ) ;
+
+        if( !commandHelper ) {
+
+            // all commands
+            outputElement.innerHTML = `${commandsList.map( command => (
+                describe( command , command.name )
+            ) ).join('<br />')}`
+
+        } else {
+
+            const cmd = this.getCmdByName( commandHelper ) ;
+
+            if( !cmd ) {
+                outputElement.textContent = `"${commandHelper}" , not an valid command , if you want complet list enter : help or ?`
+            } else {
+                outputElement.textContent =  describe( cmd ) ;
+            }
+        }
+    }
+
     newFile() {
 
         const filename = this.asyncPrepare() ;
