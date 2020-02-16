@@ -96,19 +96,97 @@ class Command {
 
     cd() {
 
-        const path = this.argsCmd[0] ;
-
-        this.isPendingAction = true ;
+        const path = this.asyncPrepare() ;
 
         const {socket} = this.terminal ;
-
-        SocketCommand.idOutput = this.idOutput ;
 
         socket.emit('cd' , {
             pathCd:path ,
             cwd: this.terminal.cwd
         } ) ;
 
+    }
+
+    mkdir() {
+
+        const dirname = this.asyncPrepare() ;
+
+        const {socket} = this.terminal ;
+
+        socket.emit('mkdir' , {
+            pathMkdir: dirname ,
+            cwd: this.terminal.cwd
+        } ) ;
+
+    }
+
+    ls() {
+
+        const pathLs = this.asyncPrepare() ;
+
+        const {socket} = this.terminal ;
+
+        socket.emit('ls' , {
+            pathLs: pathLs ,
+            cwd: this.terminal.cwd
+        } ) ;
+    }
+
+    help() {
+
+        const commandHelper = this.argsCmd[0] ;
+
+        const outputElement = document.querySelector(`#${this.idOutput}`) ;
+
+        const describe = (cmd,cmdName) => (
+            `"${cmdName || commandHelper}" , describe : ${cmd.describe} , arg.s : ${cmd.argsLength} , args require.s : ${cmd.argsRequireLength} , read only : ${cmd.readOnly ? "yes": "no"}`
+        ) ;
+
+        if( !commandHelper ) {
+
+            // all commands
+            outputElement.innerHTML = `${commandsList.map( command => (
+                describe( command , command.name )
+            ) ).join('<br />')}`
+
+        } else {
+
+            const cmd = this.getCmdByName( commandHelper ) ;
+
+            if( !cmd ) {
+                outputElement.textContent = `"${commandHelper}" , not an valid command , if you want complet list enter : help or ?`
+            } else {
+                outputElement.textContent =  describe( cmd ) ;
+            }
+        }
+    }
+
+    newFile() {
+
+        const filename = this.asyncPrepare() ;
+
+        const {socket} = this.terminal ;
+
+        socket.emit('new file' , ({
+            filePath: filename ,
+            cwd: this.terminal.cwd
+        } ) ) ;
+    }
+
+    fs() {
+
+        const {socket} = this.terminal ;
+
+        socket.emit('fs') ;
+    }
+
+    asyncPrepare() {
+
+        this.isPendingAction = true ;
+
+        SocketCommand.idOutput = this.idOutput ;
+
+        return this.argsCmd[0] ;
     }
 
     getCmdByName( cmdName ) {

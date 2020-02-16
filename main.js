@@ -1,6 +1,5 @@
 const {app,BrowserWindow} = require('electron') ;
 const path = require('path') ;
-const fs = require('fs') ;
 
 app.on('window-all-closed' , () => app.quit() ) ;
 
@@ -15,33 +14,13 @@ function createWindow( io ) {
         }
     } ) ;
 
-    io.on('connect' , socket => {
+    const shortcuts = require('./lib/shortcuts/endpoint') ;
 
-        socket.on('logout' , () => {
+    shortcuts.listeners( win ) ;
 
-            app.quit() ;
+    const shortcutsFx = shortcuts.actions ;
 
-        } ) ;
-
-        socket.on('cd' , ({pathCd,cwd}) => {
-
-            if( !path.isAbsolute( pathCd ) ) {
-
-                pathCd = path.join( cwd , pathCd ) ;
-
-            }
-
-            fs.access( pathCd , err => {
-
-                const eventName = `cd ${err ? "error" : "success"}` ;
-
-                socket.emit(eventName , pathCd ) ;
-
-            } ) ;
-
-        } ) ;
-
-    } ) ;
+    require('./lib/tcp')( { io , win , app , shortcutsFx } ) ;
 
     win.loadURL('http://localhost:3000/') ;
 
@@ -50,12 +29,9 @@ function createWindow( io ) {
     win.webContents.openDevTools() ;
 
     win.removeMenu() ;
-
-    // call global shortcuts
-    require('./lib/shortcuts/endpoint')( win ) ;
 }
 
-// server
+// server HTTP
 const
     exp = require('express') ,
     routerHTTP = exp() ,
