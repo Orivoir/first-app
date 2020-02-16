@@ -96,19 +96,50 @@ class Command {
 
     cd() {
 
-        const path = this.argsCmd[0] ;
-
-        this.isPendingAction = true ;
+        const path = this.asyncPrepare() ;
 
         const {socket} = this.terminal ;
-
-        SocketCommand.idOutput = this.idOutput ;
 
         socket.emit('cd' , {
             pathCd:path ,
             cwd: this.terminal.cwd
         } ) ;
 
+    }
+
+    mkdir() {
+
+        const dirname = this.asyncPrepare() ;
+
+        const {socket} = this.terminal ;
+
+        socket.emit('mkdir' , {
+            pathMkdir: dirname ,
+            cwd: this.terminal.cwd
+        } ) ;
+
+    }
+
+    ls() {
+
+        const pathLs = this.asyncPrepare() ;
+
+        const {socket} = this.terminal ;
+
+        socket.emit('ls' , {
+            pathLs: pathLs ,
+            cwd: this.terminal.cwd
+        } ) ;
+    }
+
+    asyncPrepare() {
+
+        this.isPendingAction = true ;
+
+
+        SocketCommand.idOutput = this.idOutput ;
+
+        return this.argsCmd[0] ;
     }
 
     getCmdByName( cmdName ) {

@@ -41,3 +41,9 @@ ul , ol {
     font-size: 20px;
     letter-spacing: .07rem;
 }
+
+.tab {
+
+    display: inline-block;
+    margin: 0 2.3vw;
+}

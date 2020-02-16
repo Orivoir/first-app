@@ -15,33 +15,7 @@ function createWindow( io ) {
         }
     } ) ;
 
-    io.on('connect' , socket => {
-
-        socket.on('logout' , () => {
-
-            app.quit() ;
-
-        } ) ;
-
-        socket.on('cd' , ({pathCd,cwd}) => {
-
-            if( !path.isAbsolute( pathCd ) ) {
-
-                pathCd = path.join( cwd , pathCd ) ;
-
-            }
-
-            fs.access( pathCd , err => {
-
-                const eventName = `cd ${err ? "error" : "success"}` ;
-
-                socket.emit(eventName , pathCd ) ;
-
-            } ) ;
-
-        } ) ;
-
-    } ) ;
+    require('./lib/tcp')( { io , win , app } ) ;
 
     win.loadURL('http://localhost:3000/') ;
 
