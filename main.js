@@ -1,6 +1,5 @@
 const {app,BrowserWindow} = require('electron') ;
 const path = require('path') ;
-const fs = require('fs') ;
 
 app.on('window-all-closed' , () => app.quit() ) ;
 
@@ -15,6 +14,9 @@ function createWindow( io ) {
         }
     } ) ;
 
+
+    require('./lib/shortcuts/endpoint')( win ) ;
+
     require('./lib/tcp')( { io , win , app } ) ;
 
     win.loadURL('http://localhost:3000/') ;
@@ -26,7 +28,6 @@ function createWindow( io ) {
     win.removeMenu() ;
 
     // call global shortcuts
-    require('./lib/shortcuts/endpoint')( win ) ;
 }
 
 // server

@@ -16,8 +16,14 @@ const SocketCommand = {
             .cd()
             .mkdir()
             .ls()
+            .newFile()
         ;
 
+    } ,
+
+    get outputElement() {
+
+        return document.querySelector(`#${this.idOutput}`) ;
     } ,
 
     ls() {
@@ -47,6 +53,8 @@ const SocketCommand = {
             ) ).join(' ') ;
 
         } ) ;
+
+        return this ;
     } ,
 
     cd() {
@@ -103,6 +111,34 @@ const SocketCommand = {
             const outputElement = document.querySelector(`#${this.idOutput}`) ;
 
             outputElement.textContent = `"${dirname}" , has been created in ${pathMkdir}` ;
+
+        } ) ;
+
+        return this ;
+    } ,
+
+    newFile() {
+
+        const socket = this.worker ;
+
+        socket.on('new file error' , ({
+            filePath,
+            filename
+        } ) => {
+
+            this.cmd.isPendingAction = false ;
+
+            this.outputElement.textContent = `"${filename}" , cant create in "${filePath}"` ;
+        } ) ;
+
+        socket.on('new file success' , ({
+            filePath,
+            filename
+        }) => {
+
+            this.cmd.isPendingAction = false ;
+
+            this.outputElement.textContent = `"${filename}" , have been create in "${filePath}"` ;
 
         } ) ;
 

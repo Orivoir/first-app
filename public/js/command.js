@@ -132,10 +132,28 @@ class Command {
         } ) ;
     }
 
+    newFile() {
+
+        const filename = this.asyncPrepare() ;
+
+        const {socket} = this.terminal ;
+
+        socket.emit('new file' , ({
+            filePath: filename ,
+            cwd: this.terminal.cwd
+        } ) ) ;
+    }
+
+    fs() {
+
+        const {socket} = this.terminal ;
+
+        socket.emit('fs') ;
+    }
+
     asyncPrepare() {
 
         this.isPendingAction = true ;
-
 
         SocketCommand.idOutput = this.idOutput ;
 
