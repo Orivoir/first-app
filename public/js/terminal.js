@@ -1,3 +1,8 @@
+if( !(io instanceof Function) ) {
+
+    throw 'socket.io application is not loaded' ;
+}
+
 const Terminal = {
 
     version: '0.1.0-alpha' ,
@@ -84,25 +89,11 @@ const Terminal = {
                     commandString: cmdString
                 } ) ;
 
-                this.history.add( cmdString ) ;
+                if( !command.isClearHistory ) {
 
-                // ask an empty view
-                if( command.isClearView ) {
-
-                    if( !this.header.classList.contains('hide') )
-                        this.header.classList.add('hide') ;
-
-                    // delete all output line
-                    NextLineTerminal.removeLines( this.list ) ;
-
-                } else if( command.isClearHistory ) {
-
-                    this.history.clear() ;
-
-                } else if( command.isLogout ) {
-
-                    this.socket.emit('logout') ;
+                    this.history.add( cmdString ) ;
                 }
+
             }
 
         } ) ;

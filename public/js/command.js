@@ -1,4 +1,3 @@
-
 class Command {
 
     static get PATTERN_ARG_FUNC() {
@@ -38,55 +37,90 @@ class Command {
 
         if( this.isValidCommandName ) {
 
-            // ...
-            console.log( "valid command name" ) ;
+            this.runCommandName() ;
 
-            const cmd = this.getCmdByName( this.commandName ) ;
-
-            if( this[ cmd.normalize ] instanceof Function  ) {
-
-                if( cmd.argsRequireLength > this.argsCmd ) {
-
-                    this.output = `"${this.commandName}" , have ${cmd.argsRequireLength} args require` ;
-
-                } else {
-
-                    this[ cmd.normalize ]() ;
-                }
-
-            } else {
-
-                this.output = `"${this.commandName}" , is valid command name but action in dev` ;
-            }
-
-        }  else if( this.isVar ) {
-
-            // is an define / set var.s
-
-            Vars.parse( this.commandString , this ) ;
-
-            this.output = `${Vars.rejectsAffect.length} vars not write access, ${Vars.createsVar.length} vars has been created, ${Vars.upgradesVar.length} vars has been set` ;
-
-        } else if( !this.isOnlyArgs ) {
-
-            this.output = `"${this.commandName}" , is not an valid command name` ;
         } else {
 
-            // only args command
-            if( this.isClearHistory ) {
+            // here not enter an command name
+            // check if an exception e.g : define var , call/use global params
 
-                this.output = `history commands has been removed` ;
+            if(
+                !this.checkActionWithNotCommandName() &&
+                this.isOnlyArgs
+            ) {
+                this.output = `"${this.commandName}" , is not an valid command` ;
             }
-
-            // ...
-            console.log( "only args" );
         }
 
-
         if( this.output ) {
+
             document.querySelector(`#${this.idOutput}`).textContent = this.output ;
         }
 
+    }
+
+    checkActionWithNotCommandName() {
+
+        let isExec = true ;
+
+        if( this.isVar ) {
+            // is an define / set var.s
+            this.cycleVars() ;
+        }
+        else if( this.isClearHistory ) {
+
+            this.output = `history commands has been removed` ;
+            this.terminal.history.clear() ;
+
+        }  else if( this.isLogout ) {
+
+            this.terminal.socket.emit('logout') ;
+        } else if( this.isClearView ) {
+
+            if( !this.terminal.header.classList.contains('hide') )
+                this.terminal.header.classList.add('hide') ;
+
+            // delete all output line
+            NextLineTerminal.removeLines( this.terminal.list ) ;
+        } else {
+
+            isExec = false ;
+        }
+
+        return isExec ;
+    }
+
+    runCommandName() {
+
+        const cmd = this.getCmdByName( this.commandName ) ;
+
+        if( this[ cmd.normalize ] instanceof Function  ) {
+
+            // here command have an function associate
+
+            if( cmd.argsRequireLength > this.argsCmd ) {
+
+                // !error arg length for commands
+
+                this.output = `"${this.commandName}" , have ${cmd.argsRequireLength} args require` ;
+
+            } else {
+
+                this[ cmd.normalize ]() ;
+            }
+
+        } else {
+
+            // command name inner build development
+            this.output = `"${this.commandName}" , is valid command name but action in dev` ;
+        }
+    }
+
+    cycleVars() {
+
+        Vars.parse( this.commandString , this ) ;
+
+        this.output = `${Vars.rejectsAffect.length} vars not write access, ${Vars.createsVar.length} vars has been created, ${Vars.upgradesVar.length} vars has been set` ;
     }
 
     echo() {
@@ -336,7 +370,7 @@ class Command {
      */
     get isLogout() {
 
-        return !![ ...this.argsGlobal , ...this.argsFunc ].find( arg => (
+        return !![ ...this.argsGlobal , ...this.argsFunc , ...this.commandName ].find( arg => (
             /(logout|exit|quit)/.test( arg )
         ) )  || /(logout|exit|quit)/.test(this.commandName)  ;
     }
