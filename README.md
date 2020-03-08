@@ -3,7 +3,7 @@
 ## Terminal UI with electron app test
 
 - ```git clone https://github.com/Orivoir/first-app.git```
-- ```cd first-app```
+- ```cd terminal-ui```
 - ```npm install```
 - ```npm start```
 
